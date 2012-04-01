@@ -12,9 +12,8 @@ extern "C" {
 	bool overwrite;
 	bool error;
 	std::string errstring;
+	std::string result;
     };
-
-    std::string result;
 
     void c_dbxml_errclear(c_dbxml db)
     {
@@ -66,8 +65,8 @@ extern "C" {
 
 	try {
 	    DbXml::XmlDocument doc = db->container.getDocument(key);
-	    doc.getContent(result);
-	    return result.c_str();
+	    doc.getContent(db->result);
+	    return db->result.c_str();
 	} catch (DbXml::XmlException &xe) {
 	    db->errstring = strdup(xe.what());
 	    db->error = true;
