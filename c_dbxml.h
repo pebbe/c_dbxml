@@ -7,7 +7,7 @@ extern "C" {
 
     typedef struct c_dbxml_t *c_dbxml;
 
-    c_dbxml c_dbxml_open(char const *filename, int overwrite);
+    c_dbxml c_dbxml_open(char const *filename);
     void c_dbxml_delete(c_dbxml db);
 
     int c_dbxml_error(c_dbxml db);

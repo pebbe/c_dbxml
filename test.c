@@ -9,7 +9,7 @@ int main (int argc, char *argv [])
     char const
 	*s;
 
-    db = c_dbxml_open("test.dact", 1);
+    db = c_dbxml_open("test.dact");
     if (c_dbxml_error(db)) {
 	printf ("%s\n", c_dbxml_errstring(db));
 	c_dbxml_delete(db);

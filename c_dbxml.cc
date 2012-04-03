@@ -9,7 +9,6 @@ extern "C" {
 	DbXml::XmlManager manager;
 	DbXml::XmlUpdateContext context;
 	DbXml::XmlContainer container;
-	bool overwrite;
 	bool error;
 	std::string errstring;
 	std::string result;
@@ -21,14 +20,13 @@ extern "C" {
 	db->error = false;
     }
     
-    c_dbxml c_dbxml_open(char const *filename, int overwrite)
+    c_dbxml c_dbxml_open(char const *filename)
     {
 	c_dbxml db;
 
 	db = new c_dbxml_t;
 	db->error = false;
 	db->errstring = "";
-	db->overwrite = overwrite ? true : false;
 
 	try {
 	    db->context = db->manager.createUpdateContext();
