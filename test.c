@@ -22,6 +22,21 @@ int main (int argc, char *argv [])
     else
 	printf ("%s\n", s);
 
+    if (! c_dbxml_put_file(db, "../corpora/test-xml/7153.xml", 1))
+	printf ("%s\n", c_dbxml_errstring(db));
+
+    if (! c_dbxml_remove(db, "../corpora/test-xml/7153.xml"))
+	printf ("%s\n", c_dbxml_errstring(db));
+
+    if (! c_dbxml_remove(db, "7153.xml"))
+	printf ("%s\n", c_dbxml_errstring(db));
+
+    if (! c_dbxml_merge(db, "../corpora/geloof.dact", 0))
+	printf ("%s\n", c_dbxml_errstring(db));
+
+    if (! c_dbxml_put_xml(db, "test.xml", s, 0))
+	printf ("%s\n", c_dbxml_errstring(db));
+
     c_dbxml_delete(db);
     return 0;
 }
