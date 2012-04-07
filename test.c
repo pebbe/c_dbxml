@@ -41,14 +41,18 @@ int main (int argc, char *argv [])
     if (! c_dbxml_put_xml(db, "test.xml", s, 0))
 	printf ("%s\n", c_dbxml_errstring(db));
 
-
-
-    docs = c_dbxml_get_all(db);
-    while (c_dbxml_docs_next(docs)) {
-	printf ("Name: %s\n", c_dbxml_docs_name(docs));
-	/* printf ("Data: %s\n", c_dbxml_docs_content(docs)); */
+    docs = c_dbxml_get_query(db, "//node[@root=\"fiets\"]");
+    if (c_dbxml_error(db)) {
+	printf ("%s\n", c_dbxml_errstring(db));
+    } else {
+	while (c_dbxml_docs_next(docs)) {
+	    printf ("Name: %s\n", c_dbxml_docs_name(docs));
+	    printf ("Data: %s\n", c_dbxml_docs_content(docs));
+	}
+	printf ("End name: %s\nEnd data: %s\n",  c_dbxml_docs_name(docs), c_dbxml_docs_content(docs));
     }
     c_dbxml_docs_free(docs);
+
 
     printf ("%llu\n", c_dbxml_size(db));
 

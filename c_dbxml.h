@@ -42,6 +42,7 @@ extern "C" {
     unsigned long long c_dbxml_size(c_dbxml db);
 
     c_dbxml_docs c_dbxml_get_all(c_dbxml db);
+    c_dbxml_docs c_dbxml_get_query(c_dbxml db, char const *query);
     int c_dbxml_docs_next(c_dbxml_docs docs);
     char const * c_dbxml_docs_name(c_dbxml_docs docs);
     char const * c_dbxml_docs_content(c_dbxml_docs docs);

@@ -1,5 +1,7 @@
 #include "c_dbxml.h"
 #include <dbxml/DbXml.hpp>
+#include <cstdio>
+#include <cstdlib>
 
 extern "C" {
 
@@ -10,18 +12,22 @@ extern "C" {
 	bool error;
 	std::string errstring;
 	std::string result;
+	std::string alias;
     };
 
     struct c_dbxml_docs_t {
 	DbXml::XmlDocument doc;
 	DbXml::XmlResults it;
+	DbXml::XmlQueryContext context;
+	bool more;
 	std::string name;
 	std::string content;
-	bool more;
     };
 
     c_dbxml c_dbxml_open(char const *filename)
     {
+	char s[100];
+
 	c_dbxml db;
 
 	db = new c_dbxml_t;
@@ -29,11 +35,15 @@ extern "C" {
 	db->error = false;
 	db->errstring = "";
 
+	sprintf (s, "%i.%i.%i", rand(), rand(), rand());
+	db->alias = s;
+
 	try {
 	    db->context = db->manager.createUpdateContext();
 	    db->container = db->manager.existsContainer(filename) ?
 		db->manager.openContainer(filename) :
 		db->manager.createContainer(filename);
+	    db->container.addAlias(db->alias);
 	} catch (DbXml::XmlException &xe) {
 	    db->errstring = xe.what();
 	    db->error = true;
@@ -176,6 +186,9 @@ extern "C" {
 
     c_dbxml_docs c_dbxml_get_all(c_dbxml db)
     {
+	db->errstring = "";
+	db->error = false;
+
 	c_dbxml_docs docs;
 	docs = new c_dbxml_docs_t;
 	docs->it = db->container.getAllDocuments(DbXml::DBXML_LAZY_DOCS);
@@ -183,18 +196,45 @@ extern "C" {
 	return docs;
     }
 
+    c_dbxml_docs c_dbxml_get_query(c_dbxml db, char const *query)
+    {
+	db->errstring = "";
+	db->error = false;
+
+	c_dbxml_docs docs;
+	docs = new c_dbxml_docs_t;
+	docs->more = true;
+	try {
+
+	    docs->context = db->manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
+	    docs->context.setDefaultCollection(db->alias);
+	    docs->it = db->manager.query("collection('" + db->alias + "')" + query,
+					 docs->context,
+					 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY
+					 );
+
+	} catch (DbXml::XmlException const &xe) {
+	    docs->more = false;
+	    db->error = true;
+	    db->errstring = xe.what();
+	}
+
+	return docs;
+    }
+
     int c_dbxml_docs_next(c_dbxml_docs docs)
     {
-	if (docs->more)
+	if (docs->more) {
 	    docs->more = docs->it.next(docs->doc);
+	    docs->name.clear();
+	    docs->content.clear();
+	}
 	return docs->more ? 1 : 0;
     }
 
     char const * c_dbxml_docs_name(c_dbxml_docs docs)
     {
-	if (! docs->more)
-	    docs->name = "";
-	else
+	if (docs->more && ! docs->name.size())
 	    docs->name = docs->doc.getName();
 
 	return docs->name.c_str();
@@ -202,9 +242,7 @@ extern "C" {
 
     char const * c_dbxml_docs_content(c_dbxml_docs docs)
     {
-	if (! docs->more)
-	    docs->content = "";
-	else
+	if (docs->more && ! docs->content.size())
 	    docs->doc.getContent(docs->content);
 
 	return docs->content.c_str();
