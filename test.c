@@ -6,13 +6,15 @@ int main (int argc, char *argv [])
 {
     c_dbxml
 	db;
+    c_dbxml_docs
+	docs;
     char const
 	*s;
 
     db = c_dbxml_open("test.dact");
     if (c_dbxml_error(db)) {
 	printf ("%s\n", c_dbxml_errstring(db));
-	c_dbxml_delete(db);
+	c_dbxml_free(db);
 	return 1;
     }
 
@@ -31,12 +33,27 @@ int main (int argc, char *argv [])
     if (! c_dbxml_remove(db, "7153.xml"))
 	printf ("%s\n", c_dbxml_errstring(db));
 
+    /*
     if (! c_dbxml_merge(db, "../corpora/geloof.dact", 0))
 	printf ("%s\n", c_dbxml_errstring(db));
+    */
 
     if (! c_dbxml_put_xml(db, "test.xml", s, 0))
 	printf ("%s\n", c_dbxml_errstring(db));
 
-    c_dbxml_delete(db);
+
+
+    docs = c_dbxml_get_all(db);
+    while (c_dbxml_docs_next(docs)) {
+	printf ("Name: %s\n", c_dbxml_docs_name(docs));
+	/* printf ("Data: %s\n", c_dbxml_docs_content(docs)); */
+    }
+    c_dbxml_docs_free(docs);
+
+    printf ("%llu\n", c_dbxml_size(db));
+
+    c_dbxml_free(db);
+
+
     return 0;
 }

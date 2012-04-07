@@ -12,6 +12,14 @@ extern "C" {
 	std::string result;
     };
 
+    struct c_dbxml_docs_t {
+	DbXml::XmlDocument doc;
+	DbXml::XmlResults it;
+	std::string name;
+	std::string content;
+	bool more;
+    };
+
     c_dbxml c_dbxml_open(char const *filename)
     {
 	c_dbxml db;
@@ -34,7 +42,7 @@ extern "C" {
 	return db;
     }
 
-    void c_dbxml_delete(c_dbxml db)
+    void c_dbxml_free(c_dbxml db)
     {
 	delete db;
     }
@@ -144,13 +152,13 @@ extern "C" {
     }
 
 
-    char const * c_dbxml_get(c_dbxml db, char const * key)
+    char const * c_dbxml_get(c_dbxml db, char const * name)
     {
 	db->errstring = "";
 	db->error = false;
 
 	try {
-	    DbXml::XmlDocument doc = db->container.getDocument(key);
+	    DbXml::XmlDocument doc = db->container.getDocument(name);
 	    doc.getContent(db->result);
 	    return db->result.c_str();
 	} catch (DbXml::XmlException &xe) {
@@ -159,4 +167,52 @@ extern "C" {
 	    return db->errstring.c_str();
 	}
     }
+
+    unsigned long long c_dbxml_size(c_dbxml db)
+    {
+	return (unsigned long long) db->container.getNumDocuments();
+    }
+
+
+    c_dbxml_docs c_dbxml_get_all(c_dbxml db)
+    {
+	c_dbxml_docs docs;
+	docs = new c_dbxml_docs_t;
+	docs->it = db->container.getAllDocuments(DbXml::DBXML_LAZY_DOCS);
+	docs->more = true;
+	return docs;
+    }
+
+    int c_dbxml_docs_next(c_dbxml_docs docs)
+    {
+	if (docs->more)
+	    docs->more = docs->it.next(docs->doc);
+	return docs->more ? 1 : 0;
+    }
+
+    char const * c_dbxml_docs_name(c_dbxml_docs docs)
+    {
+	if (! docs->more)
+	    docs->name = "";
+	else
+	    docs->name = docs->doc.getName();
+
+	return docs->name.c_str();
+    }
+
+    char const * c_dbxml_docs_content(c_dbxml_docs docs)
+    {
+	if (! docs->more)
+	    docs->content = "";
+	else
+	    docs->doc.getContent(docs->content);
+
+	return docs->content.c_str();
+    }
+
+    void c_dbxml_docs_free(c_dbxml_docs docs)
+    {
+	delete docs;
+    }
+
 }

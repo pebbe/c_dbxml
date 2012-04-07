@@ -7,8 +7,10 @@ extern "C" {
 
     typedef struct c_dbxml_t *c_dbxml;
 
+    typedef struct c_dbxml_docs_t *c_dbxml_docs;
+
     c_dbxml c_dbxml_open(char const *filename);
-    void c_dbxml_delete(c_dbxml db);
+    void c_dbxml_free(c_dbxml db);
 
     int c_dbxml_error(c_dbxml db);
     char const * c_dbxml_errstring(c_dbxml db);
@@ -35,9 +37,15 @@ extern "C" {
 
     /**** READ ****/
 
-    char const * c_dbxml_get(c_dbxml db, char const * key);
+    char const * c_dbxml_get(c_dbxml db, char const * name);
 
+    unsigned long long c_dbxml_size(c_dbxml db);
 
+    c_dbxml_docs c_dbxml_get_all(c_dbxml db);
+    int c_dbxml_docs_next(c_dbxml_docs docs);
+    char const * c_dbxml_docs_name(c_dbxml_docs docs);
+    char const * c_dbxml_docs_content(c_dbxml_docs docs);
+    void c_dbxml_docs_free(c_dbxml_docs docs);
 
 
 #ifdef __cplusplus
