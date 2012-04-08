@@ -1,7 +1,5 @@
 #include "c_dbxml.h"
 #include <dbxml/DbXml.hpp>
-#include <cstdio>
-#include <cstdlib>
 
 extern "C" {
 
@@ -12,7 +10,6 @@ extern "C" {
 	bool error;
 	std::string errstring;
 	std::string result;
-	std::string alias;
     };
 
     struct c_dbxml_docs_t {
@@ -26,8 +23,6 @@ extern "C" {
 
     c_dbxml c_dbxml_open(char const *filename)
     {
-	char s[100];
-
 	c_dbxml db;
 
 	db = new c_dbxml_t;
@@ -35,15 +30,12 @@ extern "C" {
 	db->error = false;
 	db->errstring = "";
 
-	sprintf (s, "%i.%i.%i", rand(), rand(), rand());
-	db->alias = s;
-
 	try {
 	    db->context = db->manager.createUpdateContext();
 	    db->container = db->manager.existsContainer(filename) ?
 		db->manager.openContainer(filename) :
 		db->manager.createContainer(filename);
-	    db->container.addAlias(db->alias);
+	    db->container.addAlias("c_dbxml");
 	} catch (DbXml::XmlException &xe) {
 	    db->errstring = xe.what();
 	    db->error = true;
@@ -183,7 +175,6 @@ extern "C" {
 	return (unsigned long long) db->container.getNumDocuments();
     }
 
-
     c_dbxml_docs c_dbxml_get_all(c_dbxml db)
     {
 	db->errstring = "";
@@ -207,8 +198,8 @@ extern "C" {
 	try {
 
 	    docs->context = db->manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
-	    docs->context.setDefaultCollection(db->alias);
-	    docs->it = db->manager.query("collection('" + db->alias + "')" + query,
+	    docs->context.setDefaultCollection("c_dbxml");
+	    docs->it = db->manager.query(std::string("collection('c_dbxml')") + query,
 					 docs->context,
 					 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY
 					 );
