@@ -8,8 +8,6 @@ int main (int argc, char *argv [])
 	db;
     c_dbxml_docs
 	docs;
-    c_dbxml_markers
-	markers;
     char const
 	*s;
 
@@ -59,13 +57,10 @@ int main (int argc, char *argv [])
     printf ("%llu\n", c_dbxml_size(db));
 
 
-    markers = c_dbxml_markers_new();
-    c_dbxml_markers_add(markers, "//node[@root=\"fiets\"]", "activ", "1");
     s = c_dbxml_get(db, "269.xml");
-    printf ("%s\n", c_dbxml_mark_entry(s, markers));
+    printf ("%s\n", c_dbxml_mark_entry(s, "//node[@root=\"fiets\"]", "active", "1"));
     if (c_dbxml_global_error())
 	printf ("Global error: %s\n", c_dbxml_global_errstring());
-    c_dbxml_markers_free(markers);
 
 
     c_dbxml_free(db);
