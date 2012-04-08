@@ -1,6 +1,8 @@
 #include "c_dbxml.h"
 #include <dbxml/DbXml.hpp>
 
+#define ALIAS "c_dbxml"
+
 extern "C" {
 
     struct c_dbxml_t {
@@ -35,7 +37,10 @@ extern "C" {
 	    db->container = db->manager.existsContainer(filename) ?
 		db->manager.openContainer(filename) :
 		db->manager.createContainer(filename);
-	    db->container.addAlias("c_dbxml");
+	    if (!db->container.addAlias(ALIAS)) {
+		db->errstring = "Unable to add alias \"" ALIAS "\"";
+		db->error = true;
+	    }
 	} catch (DbXml::XmlException &xe) {
 	    db->errstring = xe.what();
 	    db->error = true;
@@ -46,6 +51,7 @@ extern "C" {
 
     void c_dbxml_free(c_dbxml db)
     {
+	db->container.removeAlias(ALIAS);
 	delete db;
     }
 
@@ -198,8 +204,8 @@ extern "C" {
 	try {
 
 	    docs->context = db->manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
-	    docs->context.setDefaultCollection("c_dbxml");
-	    docs->it = db->manager.query(std::string("collection('c_dbxml')") + query,
+	    docs->context.setDefaultCollection(ALIAS);
+	    docs->it = db->manager.query(std::string("collection('" ALIAS "')") + query,
 					 docs->context,
 					 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY
 					 );
