@@ -9,11 +9,16 @@ extern "C" {
 
     typedef struct c_dbxml_docs_t *c_dbxml_docs;
 
+    typedef struct c_dbxml_markers_t *c_dbxml_markers;
+
     c_dbxml c_dbxml_open(char const *filename);
     void c_dbxml_free(c_dbxml db);
 
     int c_dbxml_error(c_dbxml db);
     char const * c_dbxml_errstring(c_dbxml db);
+
+    int c_dbxml_global_error();
+    char const * c_dbxml_global_errstring();
 
     /**** WRITE ****/
 
@@ -47,6 +52,17 @@ extern "C" {
     char const * c_dbxml_docs_name(c_dbxml_docs docs);
     char const * c_dbxml_docs_content(c_dbxml_docs docs);
     void c_dbxml_docs_free(c_dbxml_docs docs);
+
+    /**** MODIFY ****/
+
+    c_dbxml_markers c_dbxml_markers_new();
+    void c_dbxml_markers_add(c_dbxml_markers markers, char const *query, char const *attr, char const *value);
+    void c_dbxml_markers_free(c_dbxml_markers markers);
+
+    /* test for error with c_dbxml_global_error();
+     * if error, retrieve message with c_dbxml_global_errstring();
+     */
+    char const * c_dbxml_mark_entry(char const *entry, c_dbxml_markers markers);
 
 
 #ifdef __cplusplus
