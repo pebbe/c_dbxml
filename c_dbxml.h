@@ -15,9 +15,6 @@ extern "C" {
     int c_dbxml_error(c_dbxml db);
     char const * c_dbxml_errstring(c_dbxml db);
 
-    int c_dbxml_global_error();
-    char const * c_dbxml_global_errstring();
-
     /**** WRITE ****/
 
     /* replace if replace != 0
@@ -50,14 +47,6 @@ extern "C" {
     char const * c_dbxml_docs_name(c_dbxml_docs docs);
     char const * c_dbxml_docs_content(c_dbxml_docs docs);
     void c_dbxml_docs_free(c_dbxml_docs docs);
-
-    /**** MODIFY ****/
-
-    /* test for error with c_dbxml_global_error();
-     * if error, retrieve message with c_dbxml_global_errstring();
-     */
-    char const * c_dbxml_mark_entry(char const *entry, char const *query, char const *attr, char const *value);
-
 
 #ifdef __cplusplus
 }

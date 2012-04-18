@@ -56,13 +56,6 @@ int main (int argc, char *argv [])
 
     printf ("%llu\n", c_dbxml_size(db));
 
-
-    s = c_dbxml_get(db, "269.xml");
-    printf ("%s\n", c_dbxml_mark_entry(s, "//node[@root=\"fiets\"]", "active", "1"));
-    if (c_dbxml_global_error())
-	printf ("Global error: %s\n", c_dbxml_global_errstring());
-
-
     c_dbxml_free(db);
 
 
