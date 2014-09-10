@@ -2,8 +2,6 @@
 #include <dbxml/DbXml.hpp>
 #include <string>
 
-#define ALIAS "c_dbxml"
-
 extern "C" {
 
     struct c_dbxml_t {
@@ -11,17 +9,20 @@ extern "C" {
 	DbXml::XmlUpdateContext context;
 	DbXml::XmlContainer container;
 	bool error;
+	std::string filename;
 	std::string errstring;
 	std::string result;
     };
 
     struct c_dbxml_docs_t {
 	DbXml::XmlDocument doc;
+	DbXml::XmlValue value;
 	DbXml::XmlResults it;
 	DbXml::XmlQueryContext context;
 	bool more;
 	std::string name;
 	std::string content;
+	std::string match;
     };
 
     c_dbxml c_dbxml_open(char const *filename)
@@ -31,6 +32,7 @@ extern "C" {
 	db = new c_dbxml_t;
 
 	db->error = false;
+	db->filename = filename;
 	db->errstring = "";
 
 	try {
@@ -38,10 +40,6 @@ extern "C" {
 	    db->container = db->manager.existsContainer(filename) ?
 		db->manager.openContainer(filename) :
 		db->manager.createContainer(filename);
-	    if (!db->container.addAlias(ALIAS)) {
-		db->errstring = "Unable to add alias \"" ALIAS "\"";
-		db->error = true;
-	    }
 	} catch (DbXml::XmlException &xe) {
 	    db->errstring = xe.what();
 	    db->error = true;
@@ -52,7 +50,6 @@ extern "C" {
 
     void c_dbxml_free(c_dbxml db)
     {
-	db->container.removeAlias(ALIAS);
 	delete db;
     }
 
@@ -205,10 +202,10 @@ extern "C" {
 	try {
 
 	    docs->context = db->manager.createQueryContext(DbXml::XmlQueryContext::LiveValues, DbXml::XmlQueryContext::Lazy);
-	    docs->context.setDefaultCollection(ALIAS);
-	    docs->it = db->manager.query(std::string("collection('" ALIAS "')") + query,
+	    docs->context.setDefaultCollection(db->filename);
+	    docs->it = db->manager.query(std::string("collection()") + query,
 					 docs->context,
-					 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY
+					 DbXml::DBXML_LAZY_DOCS | DbXml::DBXML_WELL_FORMED_ONLY | DbXml::DBXML_DOCUMENT_PROJECTION
 					 );
 
 	} catch (DbXml::XmlException const &xe) {
@@ -223,9 +220,11 @@ extern "C" {
     int c_dbxml_docs_next(c_dbxml_docs docs)
     {
 	if (docs->more) {
+	    docs->it.peek(docs->value);
 	    docs->more = docs->it.next(docs->doc);
 	    docs->name.clear();
 	    docs->content.clear();
+	    docs->match.clear();
 	}
 	return docs->more ? 1 : 0;
     }
@@ -244,6 +243,15 @@ extern "C" {
 	    docs->doc.getContent(docs->content);
 
 	return docs->content.c_str();
+    }
+
+    char const * c_dbxml_docs_match(c_dbxml_docs docs)
+    {
+	if (docs->more && ! docs->match.size() && docs->value.isNode()) {
+	    docs->match = docs->value.asString();
+	}
+
+	return docs->match.c_str();
     }
 
     void c_dbxml_docs_free(c_dbxml_docs docs)

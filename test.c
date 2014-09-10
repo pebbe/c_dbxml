@@ -47,17 +47,16 @@ int main (int argc, char *argv [])
     } else {
 	while (c_dbxml_docs_next(docs)) {
 	    printf ("Name: %s\n", c_dbxml_docs_name(docs));
-	    /* printf ("Data: %s\n", c_dbxml_docs_content(docs)); */
+	    printf ("Match: %s\n", c_dbxml_docs_match(docs));
+	    printf ("Doc: %s\n", c_dbxml_docs_content(docs));
 	}
-	printf ("End name: %s\nEnd data: %s\n",  c_dbxml_docs_name(docs), c_dbxml_docs_content(docs));
+	printf ("End name: %s\nEnd match: %s\nEnd data: %s\n",  c_dbxml_docs_name(docs), c_dbxml_docs_match(docs), c_dbxml_docs_content(docs));
     }
     c_dbxml_docs_free(docs);
-
 
     printf ("%llu\n", c_dbxml_size(db));
 
     c_dbxml_free(db);
-
 
     return 0;
 }
